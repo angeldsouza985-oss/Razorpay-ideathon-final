@@ -31,3 +31,18 @@ backend/.pytest_cache/
 backend/__pycache__/
 backend/*.pyc
 backend/billguard.db
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local database
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated Next.js files
+next-env.d.ts
+
+# Local backups
+backend/scripts/*_backup.py
