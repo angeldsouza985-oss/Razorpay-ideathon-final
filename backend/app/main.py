@@ -8,7 +8,7 @@ load_dotenv()
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-
+import os
 from .database import init_db, get_db
 from .models.entities import *
 from .engines.revenue_engine import calculate_expected, D
@@ -34,8 +34,12 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
+        origin.strip()
+        for origin in os.getenv(
+            "CORS_ORIGINS",
+            "http://localhost:3000,http://127.0.0.1:3000"
+        ).split(",")
+        if origin.strip()
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -1154,7 +1158,7 @@ def metrics(
     # Only cases that are ACTUALLY waiting for approval
     # should be counted as human-review cases.
     #
-    # Previously, confirmed cases above ₹25,000 were also
+    # Previously, confirmed cases above G�25,000 were also
     # counted even after they had already been approved or
     # recovered.
     # --------------------------------------------------------
