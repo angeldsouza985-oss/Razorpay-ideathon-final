@@ -1,417 +1,379 @@
-# BillGuard AI
+BillGuard AI
 
-**AI-powered revenue leakage detection, investigation, governance, and recovery orchestration for B2B billing.**
+Find revenue at risk. Win it back.
 
-BillGuard AI identifies revenue that a billing system failed to capture by comparing **contracts, amendments, usage, invoices, and payments**. It combines deterministic financial calculations with evidence-grounded AI investigation and a human-governed recovery workflow.
+BillGuard AI is an AI-powered revenue recovery prototype for B2B billing operations.
 
-## What BillGuard Does
+It detects discrepancies between what a customer should have been billed and what was actually invoiced, investigates the evidence, applies bounded recovery policies, and executes a controlled recovery workflow when the case is eligible.
 
-```text
-Contract + Usage + Invoice + Payment
-                ↓
-      Deterministic Revenue Engine
-                ↓
-       Potential Leakage Cases
-                ↓
-          Evidence Collection
-                ↓
-        AI Investigation Layer
-                ↓
-     Confirmed / Exception / Unclear
-                ↓
-       Recovery Recommendation
-                ↓
-       Governance & Risk Check
-                ↓
-          Human Approval
-                ↓
-       Simulated Recovery
-                ↓
-          Complete Audit Trail
-```
+Core workflow: Detect → Collect Evidence → Investigate → Govern → Recover → Audit
 
-### Core principle
+Why BillGuard?
 
-**AI does not control financial truth.**
+Revenue leakage is often hidden inside operational handoffs:
 
-The deterministic revenue engine calculates expected billing amounts. The AI layer interprets the supplied evidence and explains the likely root cause. Recovery actions remain subject to governance and human approval.
+contract terms change but billing does not
 
----
+customer usage exceeds what was invoiced
 
-## Key Features
+price escalations are missed
 
-### 1. Deterministic Leakage Detection
+billing exceptions are not handled correctly
 
-Compares:
+recoverable value remains unresolved
 
-* Contract pricing
-* Discounts
-* Price escalations
-* Usage and overage
-* Amendments
-* Service charges
-* Taxes
-* Invoice totals
-* Payment status
+A simple anomaly detector is not enough. Teams still need to establish whether the discrepancy is real, decide what action is permitted, execute that action, and maintain an audit trail.
 
-Financial calculations use Python `Decimal` rather than floating-point arithmetic.
+BillGuard closes that loop.
 
-### 2. Evidence-Grounded AI Investigation
+What the Prototype Does
 
-The investigation service sends the collected evidence package to the configured AI provider.
+1. Detect
 
-The model is explicitly instructed to:
+BillGuard compares:
 
-* Use only supplied evidence
-* Avoid inventing financial values
-* Preserve deterministic calculations
-* Explain the root cause
-* Classify the case
-* Recommend an action
-* Never approve or execute recovery
+Contracts
 
-If the AI provider is unavailable, BillGuard falls back to a deterministic investigation path.
+Usage records
 
-### 3. Recovery Strategy
+Contract amendments
 
-Confirmed leakage can produce a recovery recommendation such as:
+Invoices
 
-```text
-GENERATE_ADJUSTMENT_INVOICE
-```
+Payments
 
-The recommendation includes:
+It calculates expected revenue versus invoiced revenue and creates leakage cases when a meaningful discrepancy is detected.
 
-* Expected recovery
-* Intervention cost
-* Approval requirement
-* Governance decision
-* Governance reason
+2. Investigate
 
-### 4. Human-in-the-Loop Governance
+Each case becomes an evidence package.
 
-Recovery above the configured approval threshold requires human approval.
+The AI investigation layer produces a structured interpretation containing:
 
-For example:
+classification
 
-```text
-Recovery: ₹54,000
-Approval threshold: ₹25,000
-Decision: HUMAN_REVIEW
-```
+rationale
 
-The system therefore does not allow the AI to autonomously recover money.
+recommended recovery action
 
-### 5. Simulated Recovery
+evidence-aware explanation
 
-After approval, BillGuard can simulate the recovery workflow and generate a simulated adjustment identifier.
+The AI is used for interpretation and recommendation; it does not own the system's financial truth.
 
-Example:
+3. Govern
 
-```text
-Status: RECOVERED
-Recovered amount: ₹54,000
-Simulated invoice: SIM-XXXXXXXXXXXX
-```
+Recovery recommendations pass through deterministic policy controls.
 
-No real financial transaction is performed.
+Outcome
 
-### 6. Full Audit Trail
+Meaning
 
-The system records important events including:
+AUTO_APPROVE
 
-* CASE_CREATED
-* EVIDENCE_COLLECTED
-* INVESTIGATION_STARTED
-* AI_INVESTIGATION_STARTED
-* AI_INVESTIGATION_COMPLETED
-* LEAKAGE_CONFIRMED
-* RECOVERY_RECOMMENDED
-* GOVERNANCE_CHECKED
-* APPROVAL_REQUESTED
-* RECOVERY_APPROVED
-* RECOVERY_EXECUTED
+Evidence and economics satisfy the recovery policy
 
-This provides traceability from detection through recovery.
+HUMAN_REVIEW
 
----
+The case exceeds automatic authority or needs human judgment
 
-## Architecture
+STOP
 
-### Backend
+Evidence is insufficient or the recovery path is invalid
 
-* Python
-* FastAPI
-* SQLAlchemy
-* SQLite
-* Pydantic
-* Deterministic revenue engine
-* Evidence collection service
-* AI investigation service
-* Recovery strategy
-* Governance engine
-* Audit logging
+This creates bounded automation instead of unrestricted financial actions.
 
-### Frontend
+4. Recover
 
-* Next.js
-* React
-* TypeScript
-* Tailwind CSS
-* shadcn/ui components
+For an eligible case, BillGuard executes a specific recovery action.
 
-### AI
+In the current prototype this is represented by a simulated recovery invoice, followed by an updated case status and recovery metrics.
 
-The AI integration is provider-configurable through environment variables.
+5. Audit
 
-Default configuration:
+The workflow records the decision chain:
 
-```env
-OPENAI_MODEL=gpt-4o-mini
-OPENAI_BASE_URL=https://api.openai.com/v1
-AI_PROVIDER=openai
-```
+evidence → investigation → policy decision → recovery action → outcome
 
-The API key is intentionally excluded from version control.
+This makes the recovery path traceable and reviewable.
 
----
+Architecture
 
-## Local Setup
+                 ┌─────────────────────────┐
+                 │ Contracts / Amendments   │
+                 │ Usage / Invoices         │
+                 │ Payments                 │
+                 └────────────┬────────────┘
+                              │
+                              ▼
+                 ┌─────────────────────────┐
+                 │ Revenue Detection Engine │
+                 │ Expected vs Invoiced     │
+                 └────────────┬────────────┘
+                              │
+                              ▼
+                 ┌─────────────────────────┐
+                 │ Leakage Case             │
+                 └────────────┬────────────┘
+                              │
+                              ▼
+                 ┌─────────────────────────┐
+                 │ AI Investigation         │
+                 │ Classification + Rationale│
+                 └────────────┬────────────┘
+                              │
+                              ▼
+                 ┌─────────────────────────┐
+                 │ Deterministic Governance│
+                 │ Auto / Human / Stop      │
+                 └────────────┬────────────┘
+                              │
+                              ▼
+                 ┌─────────────────────────┐
+                 │ Bounded Recovery         │
+                 │ + Audit Event            │
+                 └─────────────────────────┘
 
-### Backend
+Technology
 
-From the project root:
+Frontend
 
-```powershell
-cd backend
-python -m venv .venv
-.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-python -m uvicorn app.main:app --reload
-```
+Next.js
 
-The API will run at:
+React
 
-```text
-http://127.0.0.1:8000
-```
+TypeScript
 
-Swagger documentation:
+Backend
 
-```text
-http://127.0.0.1:8000/docs
-```
+Python
 
-### Environment variables
+FastAPI
 
-Create:
+SQLAlchemy
 
-```text
-backend/.env
-```
+Pydantic
 
-Example:
+Data
 
-```env
-OPENAI_API_KEY=
-OPENAI_MODEL=gpt-4o-mini
-OPENAI_BASE_URL=https://api.openai.com/v1
-AI_PROVIDER=openai
-```
+SQLite for the demo prototype
 
-**Never commit the actual API key.**
+AI
 
-A safe template is provided as:
+OpenAI-compatible investigation service
 
-```text
-backend/.env.example
-```
+Deterministic demo fallback when an API key is not configured
 
----
+Deployment
 
-## Demo Flow
+Frontend: Vercel
 
-### 1. Seed synthetic billing data
+Backend: Render
 
-```http
-POST /seed
-```
+Demo Results
 
-Example:
+The current seeded prototype demonstrates:
 
-```json
-{
-  "status": "seeded",
-  "customers": 100,
-  "invoices": 1200,
-  "usage_records": 120000
-}
-```
+Metric
 
-### 2. Run the deterministic leakage engine
+Value
 
-```http
-POST /engine/analyze
-```
+Leakage cases detected
 
-Example:
+12
 
-```json
-{
-  "cases_created": 1089,
-  "potential_leakage": "3637750.00"
-}
-```
+Potential leakage
 
-### 3. List leakage cases
+₹92,760
 
-```http
-GET /leakage-cases
-```
+Demonstrated recovered revenue
 
-### 4. Investigate a case
+₹2,500
 
-```http
-POST /leakage-cases/{case_id}/investigate
-```
+Prototype recovery-rate metric
 
-The investigation returns:
+99.96%
 
-* Classification
-* Root cause
-* Investigation summary
-* Reasoning
-* Evidence
-* Confidence
-* Recoverability
-* Recommended action
+Example recovery case
 
-### 5. Review the audit trail
+Customer: Vertex Labs India
+Issue: Missed price escalation
 
-```http
-GET /leakage-cases/{case_id}/audit
-```
+Expected revenue      ₹26,250
+Actually invoiced     ₹23,750
+Revenue at risk        ₹2,500
 
-### 6. Generate a recovery recommendation
+The demonstrated workflow is:
 
-```http
-POST /leakage-cases/{case_id}/recommend-recovery
-```
+Investigate
+    ↓
+CONFIRMED_LEAKAGE
+    ↓
+AUTO_APPROVE
+    ↓
+Recover
+    ↓
+₹2,500 recovered
 
-### 7. Approve recovery
+Live Prototype
 
-```http
-POST /leakage-cases/{case_id}/approve-recovery
-```
+Production frontend:
+https://billguard-kappa.vercel.app
 
-Cases exceeding the governance threshold require explicit human approval.
+Production API:
+https://billguard-api-gb6a.onrender.com
 
-### 8. Execute simulated recovery
+The frontend communicates with the production FastAPI service.
 
-```http
-POST /leakage-cases/{case_id}/recover
-```
+Prototype note: the current Render deployment uses SQLite on the service filesystem. The demo dataset should therefore be treated as prototype/demo state rather than production-grade persistent storage.
 
-The recovery is simulated and does not perform a real financial transaction.
+Running Locally
 
----
-
-## Example Investigation
-
-A detected case can contain evidence such as:
-
-```text
-Contract base price: ₹50,000
-Included usage: 100,000 API calls
-Actual usage: 178,000 API calls
-Overage rate: ₹0.50/API call
-Actual invoice: ₹40,000
-Expected invoice: ₹94,000
-Potential leakage: ₹54,000
-```
-
-BillGuard can classify this as confirmed leakage, explain the evidence, recommend an adjustment invoice, and route the recovery through governance.
-
-For a ₹54,000 recovery with a ₹25,000 approval threshold:
-
-```text
-Governance decision: HUMAN_REVIEW
-Approval required: true
-```
-
-After explicit approval:
-
-```text
-Status: APPROVED
-        ↓
-Simulated recovery
-        ↓
-Status: RECOVERED
-```
-
-Every step is recorded in the audit trail.
-
----
-
-## Testing
+Backend
 
 From the backend directory:
 
-```powershell
-python -m pytest -q
-```
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn app.main:app --reload
 
-The current test suite covers the core seed, revenue, investigation, recovery, governance, and endpoint workflows.
+Backend:
 
----
+http://127.0.0.1:8000
 
-## Security & Data Handling
+Seed the demo data
 
-The project is a hackathon prototype.
+With the backend running:
 
-* No real customer data is used.
-* API keys are stored in local environment variables.
-* `.env` is excluded from Git.
-* Recovery execution is simulated.
-* AI cannot directly authorize financial recovery.
-* SQLite is used for demonstration purposes.
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/seed" -Method POST
 
----
+Then run detection:
 
-## Prototype Limitations
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/engine/analyze" -Method POST
 
-This prototype does not yet provide:
+Frontend
 
-* Production authentication
-* Production database migrations
-* Real payment gateway execution
-* Real adjustment invoice creation
-* WhatsApp/customer outreach
-* Production-scale infrastructure
-* Enterprise identity and access management
+From the project root:
 
-The recovery layer intentionally remains simulated for safety.
+npm install
+npm run dev
 
----
+Open:
 
-## Why BillGuard AI?
+http://localhost:3000
 
-Traditional billing systems can correctly process invoices while still missing revenue caused by:
+The frontend API endpoint can be configured through NEXT_PUBLIC_API_URL. The current demo build may also point directly to the production Render API.
 
-* Unbilled usage
-* Incorrect rates
-* Missed price escalations
-* Contract amendments
-* Discount errors
-* Service charge discrepancies
-* Other contract-to-invoice mismatches
+API
 
-BillGuard approaches the problem as an **evidence and recovery pipeline**, not simply as an anomaly detector.
+Important endpoints:
 
-The goal is to move from:
+GET  /dashboard/metrics
+GET  /leakage-cases
+GET  /leakage-cases/{id}
 
-**"Something looks wrong."**
+POST /seed
+POST /engine/analyze
+POST /leakage-cases/{id}/investigate
+POST /leakage-cases/{id}/recommend-recovery
+POST /leakage-cases/{id}/recover
 
-to:
+When running locally, FastAPI documentation is available at:
 
-**"Here is the evidence, here is the deterministic financial difference, here is the explanation, here is the recovery recommendation, here is the governance decision, and here is the complete audit trail."**
+http://127.0.0.1:8000/docs
+
+AI and Safety Design
+
+BillGuard deliberately separates reasoning from authority.
+
+AI is responsible for
+
+interpreting evidence
+
+classifying leakage
+
+explaining discrepancies
+
+recommending an action
+
+Deterministic application logic is responsible for
+
+financial calculations
+
+policy thresholds
+
+approval requirements
+
+stopping conditions
+
+recovery execution
+
+persistence and audit records
+
+This lets the system use AI without giving the model unrestricted control over financial actions.
+
+Project Structure
+
+bill-guard-ai/
+│
+├── app/
+│   └── page.tsx
+│
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── database.py
+│   │   ├── models/
+│   │   └── services/
+│   ├── scripts/
+│   │   └── seed_data.py
+│   ├── requirements.txt
+│   └── .python-version
+│
+├── package.json
+├── README.md
+└── .gitignore
+
+Testing
+
+From the backend directory:
+
+pytest -q
+
+Prototype Boundaries
+
+This is a hackathon/demo prototype, not a production billing platform.
+
+Current limitations include:
+
+SQLite is used for demo storage
+
+authentication is not implemented
+
+recovery actions are simulated rather than connected to a live payment/billing provider
+
+the prototype uses seeded synthetic data
+
+production-grade database migrations and persistent infrastructure are not included
+
+The focus is the revenue-recovery agent workflow, bounded automation, governance, and auditability.
+
+Why This Is Different
+
+Traditional billing analytics can tell a team:
+
+“Something looks wrong.”
+
+BillGuard is designed to continue the workflow:
+
+“Something looks wrong → here is the evidence → here is what it means → here is what policy allows → here is the recovery action → here is the audit trail.”
+
+That is the core idea behind AI Revenue Recovery.
+
+Challenge
+
+Built as a prototype for the Razorpay AI Buildathon — AI Revenue Recovery track.
+
+BillGuard AI
+
+Detect. Investigate. Recover.
